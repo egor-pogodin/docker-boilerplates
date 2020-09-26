@@ -1,7 +1,7 @@
 .idea/
 nbproject
 
-src/
-docker/dumps/*
+src/*
+docker/*
 
 !**/**/.gitkeep
