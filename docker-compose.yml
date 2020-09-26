@@ -1,0 +1,78 @@
+version: '3'
+
+services:
+  # apache:
+  #   image: httpd:2.4-alpine
+  #   container_name: simplacms_apache
+  #   volumes:
+  #     - ./src:/var/www/html
+  #   depends_on:
+  #     - php
+  #   networks:
+  #     - juzt_simplacms_net
+
+  # nginx:
+  #   image: nginx:1.13-alpine
+  #   container_name: simplacms_nginx
+  #   ports:
+  #     - 80:80
+  #   volumes:
+  #     - ./src:/var/www/html
+  #     - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+  #     - ./docker/nginx/conf.d:/etc/nginx/conf.d
+  #   # depends_on:
+  #     # - apache
+  #   networks:
+  #     - juzt_simplacms_net
+
+# --------------
+
+  php:
+    image: php
+    container_name: simplacms_php
+    build:
+      ./docker/php
+    ports:
+      - 80:80
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+      - ./docker/apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
+    depends_on:
+      - mariadb
+    networks:
+      - juzt_simplacms_net
+
+  mariadb:
+    image: mariadb:10.3
+    container_name: simplacms_db
+    volumes:
+      - ./docker/dumps:/var/dumps
+      - juzt_simplacms_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: simplacms_db
+      MYSQL_USER: simplacms_user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    networks:
+      - juzt_simplacms_net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: simplacms_pma
+    links: 
+      - mariadb:db
+    ports:
+      - 8765:80
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    depends_on:
+      - mariadb
+    networks:
+      - juzt_simplacms_net
+
+volumes:
+  juzt_simplacms_data:
+
+networks:
+  juzt_simplacms_net:
